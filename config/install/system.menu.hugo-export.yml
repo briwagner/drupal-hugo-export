@@ -1,0 +1,7 @@
+langcode: en
+status: true
+dependencies: {  }
+id: hugo-export
+label: 'Hugo Export'
+description: 'Menu to control content that is exported as Hugo frontmatter'
+locked: false

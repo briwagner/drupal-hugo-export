@@ -1,0 +1,7 @@
+services:
+  hugo_export.content_generator:
+    class: Drupal\hugo_export\HugoContentGenerator
+    arguments: ['@config.factory', 'hugo_export.menu_loader']
+  hugo_export.menu_loader:
+    class: Drupal\hugo_export\HugoMenuLoader
+    arguments: ['@menu.link_tree']

@@ -1,0 +1,21 @@
+hugo_export.settings:
+  path: '/admin/config/hugo_export'
+  defaults:
+    _title: 'Hugo Export settings'
+    _form: '\Drupal\hugo_export\Form\HugoExportSettings'
+  requirements:
+    _permission: 'administer site'
+hugo_export.generator_form:
+  path: '/admin/config/hugo_export/generate'
+  defaults:
+    _title: 'Hugo Export Content Generator'
+    _form: '\Drupal\hugo_export\Form\HugoExportGeneratorForm'
+  requirements:
+    _permission: 'administer site'
+hugo_export.generator_view_form:
+  path: '/admin/config/hugo_export/generate/view'
+  defaults:
+    _title: "Hugo Export View Content"
+    _form: '\Drupal\hugo_export\Form\HugoExportGeneratorViewForm'
+  requirements:
+    _permission: 'administer site'

@@ -1,0 +1,14 @@
+hugo_export.settings:
+  title: 'Module Settings'
+  route_name: hugo_export.settings
+  base_route: hugo_export.settings
+hugo_export.generate:
+  title: 'Export Menu Content'
+  route_name: hugo_export.generator_form
+  base_route: hugo_export.settings
+  weight: 101
+hugo_export.generate_view:
+  title: 'Export Views Content'
+  route_name: hugo_export.generator_view_form
+  base_route: hugo_export.settings
+  weight: 102

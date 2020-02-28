@@ -1,0 +1,6 @@
+hugo_export.settings:
+  title: 'Hugo Export'
+  description: 'Module settings'
+  parent: system.admin_config_content
+  route_name: hugo_export.settings
+  weight: 101

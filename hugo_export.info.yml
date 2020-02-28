@@ -1,0 +1,6 @@
+name: Hugo Export
+description: Export content to Hugo frontmatter
+package: Custom
+type: module
+core: 8.x
+configure: hugo_export.settings
