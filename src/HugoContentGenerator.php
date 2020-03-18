@@ -2,11 +2,9 @@
 
 namespace Drupal\hugo_export;
 
-use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
-use Drupal\hugo_export\HugoMenuLoader;
 use Drupal\node\Entity\Node;
-use Drupal\taxonomy\Entity\Term;
+use Symfony\Component\Serializer\Serializer;
 
 /**
  * HugoContentGenerator exports the static files.
@@ -16,26 +14,18 @@ class HugoContentGenerator {
   use StringTranslationTrait;
 
   /**
-   * @var ConfigFactoryInterface
+   * @var Serializer
    */
-  protected $configFactory;
-
-  /**
-   * @var HugoMenuLoader;
-   */
-  protected $menuLoader;
+  protected $serializer;
 
   /**
    * Constructor.
    *
-   * @param Drupal\Core\Config\ConfigFactoryInterface $configFactory
-   *   Config factory service.
-   * @param Drupal\hugo_export\HugoMenuLoader $menuLoader
-   *   Hugo-export MenuLoader.
+   * @param Symfony\Component\Serializer\Serializer $serializer
+   *   Serializer service.
    */
-  public function __construct($configFactory, $menuLoader) {
-    $this->configFactory = $configFactory->get('hugo_export.settings');
-    $this->menuLoader = $menuLoader;
+  public function __construct(Serializer $serializer) {
+    $this->serializer = $serializer;
   }
 
   /**
@@ -43,8 +33,7 @@ class HugoContentGenerator {
    */
   public static function create(ContainerInterface $container) {
     return new static(
-      $container->get('config.factory'),
-      $container->get('hugo_export.menu_loader')
+      $container->get('serializer')
     );
   }
 
@@ -78,24 +67,12 @@ class HugoContentGenerator {
 
       // Do we want .md files or what?
       $fileName = sprintf("%s/%s.md", $dir, $node->id());
-      if (file_unmanaged_save_data($this->formatFile($node, $menu), $fileName, FILE_EXISTS_REPLACE)) {
+      $fileData = $this->serializer->serialize($node, 'markdown', ['menu' => $menu]);
+      if (file_unmanaged_save_data($fileData, $fileName, FILE_EXISTS_REPLACE)) {
         return TRUE;
       }
     }
     return FALSE;
-  }
-
-  /**
-   * Export to file
-   *
-   * @param Node $node
-   *   Node interface.
-   * @param string $menu
-   *   Menu name.
-   */
-  public function formatFile($node, string $menu = NULL) {
-    $data = \Drupal::service('serializer')->serialize($node, 'markdown', ['menu' => $menu]);
-    return $data;
   }
 
 }

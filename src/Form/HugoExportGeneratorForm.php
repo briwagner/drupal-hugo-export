@@ -107,7 +107,7 @@ class HugoExportGeneratorForm extends FormBase {
     // Send NIDs to batch operation.
     foreach ($nids as $id) {
       $batch['operations'][] = [
-        '\Drupal\hugo_export\HugoExportBatch::exportEntity',
+        '\Drupal\hugo_export\Batch\HugoExportBatch::exportEntity',
         [$id, $dirBase, $menuName]
       ];
     }
