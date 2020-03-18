@@ -94,41 +94,8 @@ class HugoContentGenerator {
    *   Menu name.
    */
   public function formatFile($node, string $menu = NULL) {
-    $output = "---\ntitle: " . $node->getTitle();
-    $output .= "\ndate: " . \Drupal::service('date.formatter')->format($node->getCreatedTime(), 'html_datetime');
-    $output .= "\ndraft: false";
-    // $output .= "\nnid: ". $node->id();
-    $output .= "\ntype: " . $node->getType();
-    $output .= "\nurl: " . $node->toUrl()->toString();
-    $output .= "\nauthor: " . $node->getOwner()->getDisplayName();
-    if ($menu) { // Views content does not use a menu.
-      $output .= "\nmenu: " . $menu;
-    }
-    // Images: TODO.
-    // Taxonomy terms
-    $output .= "\ntags: " . $this->formatTermNames($node);
-    $output .= "\n---\n";
-    $output .= "\n" . $node->body->value;
-    return $output;
-  }
-
-  /**
-   * Get tag names on node.
-   *
-   * @return string
-   *   List of terms on node.
-   */
-  protected function formatTermNames($node) {
-    $tags = [];
-    if ($node->hasField('field_tags') && !$node->field_tags->isEmpty()) {
-      foreach ($node->field_tags->getValue() as $termRef) {
-        $term = Term::load($termRef['target_id']);
-        if ($term) {
-          $tags[] = $term->getName();
-        }
-      }
-    }
-    return implode(", ", $tags);
+    $data = \Drupal::service('serializer')->serialize($node, 'markdown', ['menu' => $menu]);
+    return $data;
   }
 
 }

@@ -2,6 +2,17 @@ services:
   hugo_export.content_generator:
     class: Drupal\hugo_export\HugoContentGenerator
     arguments: ['@config.factory', 'hugo_export.menu_loader']
+
   hugo_export.menu_loader:
     class: Drupal\hugo_export\HugoMenuLoader
     arguments: ['@menu.link_tree']
+
+  serializer.hugo_export.markdown.encoder:
+    class: \Drupal\hugo_export\Encoder\Markdown
+    tags:
+      - { name: encoder, priority: 10, format: 'markdown' }
+
+  serialzer.hugo_export.hugo.content_entity:
+    class: \Drupal\hugo_export\Normalizer\ContentEntityNormalizer
+    tags:
+      - { name: normalizer, priority: 10 }
