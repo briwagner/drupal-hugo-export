@@ -4,6 +4,7 @@ namespace Drupal\hugo_export\Normalizer;
 
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Field\FieldItemListInterface;
+use Drupal\file\Entity\File;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\taxonomy\Entity\Term;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
@@ -35,6 +36,9 @@ class ContentEntityNormalizer extends SerializerAwareNormalizer implements Norma
       $data['menu'] = $context['menu'];
     }
     $data['tags'] = $this->formatTermNames($entity);
+    if ($images = $this->getImages($entity, 'field_image')) {
+      $data['images'] = $images;
+    }
     $data['_close'] = "---\n";
     $data['_body'] = $entity->body->value;
     return $data;
@@ -57,6 +61,33 @@ class ContentEntityNormalizer extends SerializerAwareNormalizer implements Norma
       }
     }
     return implode(", ", $tags);
+  }
+
+  /**
+   * Get list of image files associated with node.
+   *
+   * @param Entity $entity
+   *   Entity.
+   * @param string $field
+   *   Field name to process for images.
+   *
+   * @return string || NULL
+   *   Filenames or null.
+   */
+  protected function getImages($entity, $field) {
+    if (!$entity->hasField($field) || $entity->get($field)->isEmpty()) {
+      return NULL;
+    }
+    $data = [];
+
+    foreach ($entity->get($field)->getValue() as $item) {
+      $f = File::load($item['target_id']);
+      if ($f) {
+        $data[] = $f->getFilename();
+      }
+    }
+
+  return implode(", ", $data);
   }
 
   /**

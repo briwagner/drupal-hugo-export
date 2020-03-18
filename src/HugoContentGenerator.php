@@ -3,6 +3,7 @@
 namespace Drupal\hugo_export;
 
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\file\Entity\File;
 use Drupal\node\Entity\Node;
 use Symfony\Component\Serializer\Serializer;
 
@@ -42,7 +43,7 @@ class HugoContentGenerator {
    *
    * @param int $nid
    *   Entity ID.
-   * @param string $dir
+   * @param string $dirName
    *   Name of directory to export content.
    * @param string $menu
    *   Menu name.
@@ -50,17 +51,17 @@ class HugoContentGenerator {
    * @return bool
    *   Operation to save file succeeded or not.
    */
-  public function exportItem(int $nid, string $dir, string $menu = NULL) {
+  public function exportItem(int $nid, string $dirName, string $menu = NULL) {
     // Load node.
     $node = Node::load($nid);
     if ($node && $node->isPublished()) {
       // Prepare directory, sorting by content type ONLY if menu is set.
       if ($menu) {
-        $dir = sprintf("public://%s/%s/", $dir, $node->bundle());
+        $dir = sprintf("public://%s/%s/", $dirName, $node->bundle());
       }
       // Entities from a View go in a single directory.
       else {
-        $dir = sprintf("public://%s/", $dir);
+        $dir = sprintf("public://%s/", $dirName);
       }
 
       file_prepare_directory($dir, FILE_CREATE_DIRECTORY);
@@ -69,6 +70,27 @@ class HugoContentGenerator {
       $fileName = sprintf("%s/%s.md", $dir, $node->id());
       $fileData = $this->serializer->serialize($node, 'markdown', ['menu' => $menu]);
       if (file_unmanaged_save_data($fileData, $fileName, FILE_EXISTS_REPLACE)) {
+
+        // Prepare directory.
+        $publicDir = "public://hugo_export/public/";
+        \Drupal::service('file_system')
+          ->prepareDirectory($publicDir, \Drupal\Core\File\FileSystemInterface::CREATE_DIRECTORY);
+
+        // Export images from image field.
+        if ($node->hasField('field_image') && !$node->field_image->isEmpty()) {
+          $images = $node->field_image->getValue();
+          // Iterate over items. Default config allows one value only.
+          foreach ($images as $img) {
+            $f = File::load($img['target_id']);
+            if ($f) {
+              $filename = $publicDir . $f->getFilename();
+              if (!file_exists($filename)) {
+                // Copy file to directory.
+                file_copy($f, $filename);
+              }
+            }
+          }
+        }
         return TRUE;
       }
     }
