@@ -12,7 +12,22 @@ services:
     tags:
       - { name: encoder, priority: 10, format: 'markdown' }
 
-  serialzer.hugo_export.hugo.content_entity:
+  serializer.hugo_export.hugo.content_entity:
     class: \Drupal\hugo_export\Normalizer\ContentEntityNormalizer
+    tags:
+      - { name: normalizer, priority: 10 }
+
+  serializer.hugo_export.hugo.entity_reference:
+    class: \Drupal\hugo_export\Normalizer\EntityReferenceFieldItemNormalizer
+    tags:
+      - { name: normalizer, priority: 10 }
+
+  serializer.hugo_export.hugo.taxonomy_term:
+    class: \Drupal\hugo_export\Normalizer\TermNormalizer
+    tags:
+      - { name: normalizer, priority: 10 }
+
+  serializer.hugo_export.hugo.file_entity:
+    class: \Drupal\hugo_export\Normalizer\FileNormalizer
     tags:
       - { name: normalizer, priority: 10 }

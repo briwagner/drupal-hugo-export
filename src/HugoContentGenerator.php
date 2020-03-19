@@ -68,7 +68,15 @@ class HugoContentGenerator {
 
       // Do we want .md files or what?
       $fileName = sprintf("%s/%s.md", $dir, $node->id());
-      $fileData = $this->serializer->serialize($node, 'markdown', ['menu' => $menu]);
+      // TODO: consider adding field list to context at this point?
+      $fieldList = [
+        'field_image',
+        'field_tags'
+      ];
+      $fileData = $this->serializer->serialize($node, 'markdown', [
+        'menu' => $menu,
+        'field_list' => $fieldList
+      ]);
       if (file_unmanaged_save_data($fileData, $fileName, FILE_EXISTS_REPLACE)) {
 
         // Prepare directory.
