@@ -114,7 +114,7 @@ class HugoExportGeneratorViewForm extends FormBase {
         $entity = $row->_entity;
         if ($entity && $entity->getEntityTypeId() == 'node') {
           $batch['operations'][] = [
-            '\Drupal\hugo_export\HugoExportBatch::exportEntity',
+            '\Drupal\hugo_export\Batch\HugoExportBatch::exportEntity',
             [$entity->id(), $dirName, null],
           ];
         }
