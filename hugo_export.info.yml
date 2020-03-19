@@ -4,3 +4,6 @@ package: Custom
 type: module
 core: 8.x
 configure: hugo_export.settings
+
+dependencies:
+  - drupal:serialization
