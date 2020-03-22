@@ -104,8 +104,16 @@ class HugoExportGeneratorViewForm extends FormBase {
     // Set directory for exported files.
     $dirName = 'hugo_export/view/' . $viewName;
 
-    // Add items to batch.
-    $this->addBatchItems($batch, $viewName, $viewDisplay, $dirName, 0);
+    // Get entity IDs to add to batch.
+    $ids = [];
+    $this->addBatchItems($ids, $viewName, $viewDisplay, 0);
+    // Build batch operations from entity IDs.
+    $batch['operations'] = array_map(function($row) use ($dirName) {
+      return [
+        '\Drupal\hugo_export\Batch\HugoExportBatch::exportEntity',
+        [$row, $dirName, NULL]
+      ];
+    }, $ids);
 
     batch_set($batch);
   }
@@ -113,18 +121,16 @@ class HugoExportGeneratorViewForm extends FormBase {
   /**
    * Recursive call to get View content using pager.
    *
-   * @param array $batch
-   *   Batch to be prepared for running.
+   * @param array $entityIDs
+   *   Entity IDs.
    * @param string $viewName
    *   Name of View.
    * @param string $dispName
    *   Name of View display.
-   * @param string $dirName
-   *   Name of directory to output files in batch operation.
    * @param int $page
    *   View page number.
    */
-  protected function addBatchItems(&$batch, $viewName, $dispName, $dirName, $page = 0) {
+  protected function addBatchItems(&$entityIDs, $viewName, $dispName, $page = 0) {
     /** @var \Drupal\views\ViewExecutable $view */
     $view = Views::getView($viewName);
     $view->setDisplay($dispName);
@@ -138,15 +144,12 @@ class HugoExportGeneratorViewForm extends FormBase {
     foreach ($view->result as $row) {
       $entity = $row->_entity;
       if ($entity && $entity->getEntityTypeId() == 'node') {
-        $batch['operations'][] = [
-          '\Drupal\hugo_export\Batch\HugoExportBatch::exportEntity',
-          [$entity->id(), $dirName, null],
-        ];
+        $entityIDs[] = $entity->id();
       }
     }
     // Increment page and recurse.
     $page++;
-    $this->addBatchItems($batch, $viewName, $dispName, $dirName, $page);
+    $this->addBatchItems($entityIDs, $viewName, $dispName, $page);
   }
 
   /**
