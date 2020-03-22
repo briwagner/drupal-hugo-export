@@ -89,39 +89,64 @@ class HugoExportGeneratorViewForm extends FormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    $formView = $form_state->getvalue('export_view');
-    $formDisplay = $form_state->getvalue('export_view_display');
+    $viewName = $form_state->getvalue('export_view');
+    $viewDisplay = $form_state->getvalue('export_view_display');
 
+    // Create a batch operation to process each item.
+    $batch = [
+      'title' => 'Exporting content for Hugo.',
+      'operations' => [],
+      'init_message' => 'Beginning Hugo export',
+      'progress_message' => 'Processed @current out of @total',
+      'error_message' => 'Error during Hugo export.',
+    ];
+
+    // Set directory for exported files.
+    $dirName = 'hugo_export/view/' . $viewName;
+
+    // Add items to batch.
+    $this->addBatchItems($batch, $viewName, $viewDisplay, $dirName, 0);
+
+    batch_set($batch);
+  }
+
+  /**
+   * Recursive call to get View content using pager.
+   *
+   * @param array $batch
+   *   Batch to be prepared for running.
+   * @param string $viewName
+   *   Name of View.
+   * @param string $dispName
+   *   Name of View display.
+   * @param string $dirName
+   *   Name of directory to output files in batch operation.
+   * @param int $page
+   *   View page number.
+   */
+  protected function addBatchItems(&$batch, $viewName, $dispName, $dirName, $page = 0) {
     /** @var \Drupal\views\ViewExecutable $view */
-    $view = Views::getView($formView);
-    $view->setDisplay($formDisplay);
+    $view = Views::getView($viewName);
+    $view->setDisplay($dispName);
+    $view->setCurrentPage($page);
     $ok = $view->execute();
-    if ($ok) {
-      // Create a batch operation to process each item.
-      $batch = [
-        'title' => 'Exporting content for Hugo.',
-        'operations' => [],
-        'init_message' => 'Beginning Hugo export',
-        'progress_message' => 'Processed @current out of @total',
-        'error_message' => 'Error during Hugo export.',
-      ];
-
-      // Set directory.
-      $dirName = 'hugo_export/view/' . $formView;
-
-      // Try to get entity from row and ensure it's a node type.
-      foreach ($view->result as $row) {
-        $entity = $row->_entity;
-        if ($entity && $entity->getEntityTypeId() == 'node') {
-          $batch['operations'][] = [
-            '\Drupal\hugo_export\Batch\HugoExportBatch::exportEntity',
-            [$entity->id(), $dirName, null],
-          ];
-        }
-      }
-
-      batch_set($batch);
+    // Exit if View fails or no results are found.
+    if (!$ok || $view->result == []) {
+      return;
     }
+    // Iterate over rows to obtain entity ID.
+    foreach ($view->result as $row) {
+      $entity = $row->_entity;
+      if ($entity && $entity->getEntityTypeId() == 'node') {
+        $batch['operations'][] = [
+          '\Drupal\hugo_export\Batch\HugoExportBatch::exportEntity',
+          [$entity->id(), $dirName, null],
+        ];
+      }
+    }
+    // Increment page and recurse.
+    $page++;
+    $this->addBatchItems($batch, $viewName, $dispName, $dirName, $page);
   }
 
   /**
