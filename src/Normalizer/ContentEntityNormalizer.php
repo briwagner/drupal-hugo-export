@@ -30,7 +30,8 @@ class ContentEntityNormalizer extends SerializerAwareNormalizer implements Norma
     $data['date'] = \Drupal::service('date.formatter')->format($entity->getCreatedTime(), 'html_datetime');
     $data['last_edit'] = \Drupal::service('date.formatter')->format($entity->getChangedTime(), 'html_datetime');
     $data['draft'] = $entity->isPublished() ? 'false' : 'true';
-    $data['type'] = $entity->getType();
+    // Define archetype to use.
+    $data['kind'] = $entity->getType();
     $data['url'] = $entity->toUrl()->toString();
     $data['author'] = $entity->getOwner()->getDisplayName();
     if (isset($context['menu'])) {
