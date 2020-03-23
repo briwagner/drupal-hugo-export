@@ -26,7 +26,8 @@ class EntityReferenceFieldItemNormalizer extends SerializerAwareNormalizer imple
         foreach ($field_list as $item) {
           $items[] = $this->serializer->normalize($item, $format, $context);
         }
-        return implode(", ", $items);
+        // Return as array with brackets.
+        return "[" . implode(", ", $items) . "]";
       break;
     }
   }
