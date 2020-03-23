@@ -26,7 +26,7 @@ class ContentEntityNormalizer extends SerializerAwareNormalizer implements Norma
   public function normalize($entity, $format = NULL, array $context = []) {
     $data['_start'] = "---";
     /** @var \Drupal\Core\Entity\ContentEntityInterface $entity */
-    $data['title'] = $entity->getTitle();
+    $data['title'] = '"' . $entity->getTitle() . '"';
     $data['date'] = \Drupal::service('date.formatter')->format($entity->getCreatedTime(), 'html_datetime');
     $data['last_edit'] = \Drupal::service('date.formatter')->format($entity->getChangedTime(), 'html_datetime');
     $data['draft'] = $entity->isPublished() ? 'false' : 'true';
