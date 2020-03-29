@@ -34,6 +34,7 @@ class ContentEntityNormalizer extends SerializerAwareNormalizer implements Norma
     $data['kind'] = $entity->getType();
     $data['url'] = $entity->toUrl()->toString();
     $data['author'] = $entity->getOwner()->getDisplayName();
+    $data['summary'] = '"' . check_markup($entity->get('body')->summary) . '"';
     if (isset($context['menu'])) {
       $data['menu'] = $context['menu'];
     }
